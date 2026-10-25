@@ -4,6 +4,8 @@ English | [中文](./README.md)
 
 > **Current version: `v0.0.1-beta` (beta)** — features and on-disk data formats may still change; try it before relying on it day to day.
 
+> ⚠️ **This project is for personal study and technical exchange only, and must not be used commercially. It is not affiliated with NetEase Cloud Music in any way, and it ships no audio files.** Read [section 11 · Copyright and disclaimer](#11-copyright-and-disclaimer) before use.
+
 **Aurora Music is a multi-platform NetEase Cloud Music player**: one React front end plus a local Node proxy. Run it as a web app (open it on your phone over the same Wi-Fi), or package it as a native Windows / macOS / Linux desktop app with Tauri 2. Build scripts for Android and iOS are wired up as well.
 
 ---
@@ -303,6 +305,19 @@ AMLL renders through PixiJS (WebGL), so confirm the device supports WebGL. `@app
   - [NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi) (the proxy core under `server/`, which ships its own `server/README.md`)
   - [Apple Music Like Lyrics (AMLL)](https://github.com/amll-dev/applemusic-like-lyrics) (lyric rendering and parsing; check its license terms yourself before use)
   - React, Vite, TypeScript, Tailwind CSS, shadcn/ui, Howler.js, Tauri 2, zustand
+
+## 11. Copyright and disclaimer
+
+> **This is not an official NetEase Cloud Music client, and it has no authorization or endorsement from NetEase Cloud Music. Please read this section before using or redistributing it.**
+
+- **Purpose**: this project is **for personal study, technical research, and exchange only**. **Any commercial use is prohibited** (including but not limited to paid distribution, bundling with paid products, or using it to deliver commercial work).
+- **Attribution**: this project has **no relationship** with NetEase Cloud Music (Hangzhou NetEase Cloud Music Technology Co., Ltd.) or its affiliates. Product names, trademarks, artwork, and lyrics appearing in it belong to their respective owners and are used only for identification and explanation.
+- **No audio content**: neither the repository nor the release packages **contain, store, or distribute any audio files**, and no account credentials are bundled. Music, cover art, and lyrics are fetched at runtime by the user's own machine through third-party endpoints.
+- **Endpoints**: the app talks to **unofficial endpoints**. Such usage may violate the platform's terms of service and may break at any time when the platform changes. Whether and how to use it is your own judgement and your own risk.
+- **Prohibited uses**: do not use this project to crack paid content, bypass membership or copyright restrictions, mass-download, redistribute copyrighted works, or infringe anyone's lawful rights in any other way.
+- **Support the artists**: if you enjoy the music, buy memberships, albums, and digital releases through official channels.
+- **No warranty**: this project is provided **"AS IS"** under **AGPL-3.0**, without any express or implied warranty, and the author accepts no liability for the consequences of its use.
+- **Takedown**: if a rights holder believes this project infringes their rights, please reach out via the repository Issues or the contact on the profile page. After verification I will **remove the relevant content or stop distributing it immediately**.
 
 ---
 
