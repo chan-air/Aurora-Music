@@ -1,6 +1,6 @@
 [package]
 name = "aurora-music"
-version = "1.0.0-beta.1"
+version = "0.0.1-beta"
 description = "Aurora Music - 多端网易云音乐播放器"
 authors = ["Aurora Music"]
 edition = "2021"

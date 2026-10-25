@@ -1,7 +1,7 @@
 {
   "name": "aurora-music-server",
   "private": true,
-  "version": "1.0.0-beta.1",
+  "version": "0.0.1-beta",
   "description": "NeteaseCloudMusicApi 后端代理（Node.js）",
   "main": "index.js",
   "scripts": {
