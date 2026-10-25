@@ -1,0 +1,4 @@
+# pnpm 11+ 的设置统一放在此文件（package.json 的 pnpm 字段已不再读取）
+# 允许 esbuild 运行其 postinstall（Vite 依赖的构建脚本）
+allowBuilds:
+  esbuild: true

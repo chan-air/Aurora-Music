@@ -1,0 +1,833 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 软件字体：由设置里的「软件字体」写入 --app-font（未设置时用系统默认栈） */
+html {
+  font-family: var(
+    --app-font,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif
+  );
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 262 83% 58%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 5.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 5.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 263 85% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 85% 66%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    overscroll-behavior: none;
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/40;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 文本截断辅助 */
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-300 bg-clip-text text-transparent;
+  }
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* AMLL 歌词字体 / 字重（core 只内置了 font-size、color 变量，这里补上字体与字重）
+   以及歌词上/下淡出：用 mask 只淡化歌词本身，不叠加颜色到背景（避免背景断层） */
+.amll-lyric-player {
+  font-family: var(--amll-lp-font-family, inherit);
+  font-weight: var(--amll-lp-font-weight, inherit);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 12%,
+    black 88%,
+    transparent 100%
+  );
+}
+
+/* 歌词渐显：切换歌曲/出现歌词时，晚 0.1s 后淡入 */
+.lyrics-fade {
+  animation: lyrics-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+@keyframes lyrics-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * 大封面布局下彻底隐藏歌词容器。
+ * 两条路都被堵住：
+ *  1) .lyrics-fade 的动画 fill-mode 是 both，终帧给 opacity: 1，
+ *     动画值压过普通声明 —— 所以 opacity-0 无效；
+ *  2) AMLL 的歌词行自带 visibility: visible，父级 visibility: hidden 也拦不住。
+ * 只有 !important 的 opacity 能压过动画，而 opacity 是父级合成，
+ * 子元素无法再把它撤回来。容器尺寸不受影响，AMLL 仍能正常布局。
+ */
+.lyrics-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/*
+ * 跳转过渡期直接隐掉间奏三点。
+ * AMLL 的间奏小圆点由内部状态驱动：点击歌词跳到某一行后，若音频尚未追上、
+ * 或状态没被重新推导，小圆点可能留在原处不消失。这里在「刚刚发生跳转」的
+ * 过渡期内无条件隐藏它，保证点完歌词小圆点立刻消失；过渡结束后恢复由 AMLL 接管。
+ */
+.lyrics-hide-interlude [class*="interludeDots"] {
+  display: none !important;
+}
+
+/*
+ * 顶部提示框：从屏幕上方「飞下来」。
+ * 起点在顶部之外、略带缩小，落定后停在原位；缓动末端略带回弹，观感更利落。
+ * 结束态就是最终样式（both 填充），所以不需要额外写 opacity/transform 的静态规则。
+ */
+@keyframes toast-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-140%) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/*
+ * 退出：原路向上飞回屏幕顶部之外。
+ *
+ * 这里**必须用另一组关键帧**（animation-name 与进场不同），不能只写
+ * `animation: toast-drop … reverse` —— 进场时 toast-drop 已经播完，改方向只会
+ * 「更新那个已结束的动画」，浏览器不会重新启动它，于是元素直接停在填充状态、
+ * 看起来就是没有退场动画直接消失。换了 animation-name 才会被当成新动画启动。
+ *
+ * 缓动曲线是进场曲线的镜像（交换控制点、取补），所以轨迹严格对称。
+ */
+@keyframes toast-rise {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-140%) scale(0.94);
+  }
+}
+.toast-drop {
+  animation: toast-drop 0.42s cubic-bezier(0.22, 1.15, 0.36, 1) both;
+}
+.toast-rise {
+  animation: toast-rise 0.42s cubic-bezier(0.64, 0, 0.78, -0.15) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-drop,
+  .toast-rise {
+    animation-duration: 0.01ms;
+  }
+}
+
+/*
+ * 当前句已唱完、而下一句还没开始（两行间隔小到放不下间奏三点）。
+ *
+ * AMLL 核心源码写明：行高亮「唱完后不会自行熄灭，而是继续保持高亮」，
+ * 只有①下一句开始 ②进入间奏区间 ③歌曲结束 ④跳转 时才清空。
+ * 所以间隔大（成间奏）时会清空高亮并交给间奏点，间隔小则一直亮着且没有模糊。
+ *
+ * 这里替 AMLL 补上「小间隔」的情形：把当前行的遮罩压回默认值（取消高亮），
+ * 并套用普通行的模糊（值由 JS 从非当前行镜像到 --aurora-passed-filter）。
+ * 只改视觉，不动布局 —— 高亮行的**位置**仍停在这一句，直到下一句开始才交棒。
+ */
+.lyrics-line-done [class*="bottomLineWrapper"] [class*="lyricLine"],
+.lyrics-line-done [class*="bottomLineWrapper"] [class*="lyricLineWrapper"] {
+  /* AMLL 把这两个遮罩值写在**行内 style** 上，行内声明优先于样式表，
+     必须用 !important 才压得住（filter 同理）。 */
+  --bright-mask-alpha: var(--aurora-passed-bright, 0.2) !important;
+  --dark-mask-alpha: var(--aurora-passed-dark, 0.2) !important;
+  filter: var(--aurora-passed-filter, none) !important;
+}
+
+/*
+ * 换歌时歌曲信息（封面 / 歌名 / 歌手）交叉淡入淡出：
+ * 旧内容留在上面淡出、新内容在下面淡入，避免文字与封面突变。
+ */
+@keyframes lyric-info-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes lyric-info-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+.lyric-info-in {
+  animation: lyric-info-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.lyric-info-out {
+  animation: lyric-info-out 0.34s ease both;
+}
+
+/*
+ * 歌名 / 歌手的换歌动画：纯透明度交叉淡化 ——
+ * 旧文字留在上层由 100% 不透明渐隐到全透明，新文字在下方由全透明渐显到 100%。
+ * 与封面（lyric-info-*）分开：图片带一点点缩放更好看，文字带缩放则会显得在"跳"。
+ * 两者时长一致，交叉过程对称，中途不会有一侧先消失造成的空档。
+ */
+@keyframes lyric-text-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes lyric-text-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.lyric-text-in {
+  animation: lyric-text-in 0.4s ease both;
+}
+.lyric-text-out {
+  animation: lyric-text-out 0.4s ease both;
+}
+
+/*
+ * 歌词底部柔和渐隐：
+ * 渐变落点由 --lyrics-fade-inset（控制栏高度）决定 —— 控制栏显示时渐隐收在它上方，
+ * 隐藏时落到屏幕底部。用 @property 注册后可以过渡，所以边界移动是平滑的；
+ * 而歌词容器本身高度恒定，歌词位置不会被牵动。
+ */
+@property --lyrics-fade-inset {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+.lyrics-bottom-fade {
+  --lyrics-fade-inset: 0px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--lyrics-fade-inset) - max(72px, 14%)),
+    transparent calc(100% - var(--lyrics-fade-inset))
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - var(--lyrics-fade-inset) - max(72px, 14%)),
+    transparent calc(100% - var(--lyrics-fade-inset))
+  );
+  transition: --lyrics-fade-inset 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 播放/暂停键切换时的弹性放大 */
+.pop-in {
+  animation: pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes pop-in {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ---------------- 切歌键（双正三角，层叠） ---------------- */
+
+.skip-p {
+  transform-box: view-box;
+  transform-origin: 9.02px 12px;
+  will-change: transform, opacity;
+}
+.skip-c,
+.skip-d {
+  opacity: 0;
+}
+
+.skip-anim .skip-a {
+  animation: skip-shift-a 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.skip-anim .skip-b {
+  animation: skip-exit 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.skip-anim .skip-c {
+  animation: skip-enter 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.skip-anim .skip-d {
+  animation: skip-appear 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 前层大三角 → 缩小右移补位，收尾淡出交给后层小三角 */
+@keyframes skip-shift-a {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  22% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  76% {
+    transform: translate(6.49px, 0) scale(0.9);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(6.49px, 0) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* 后层小三角 → 缩小右移，像被右侧遮挡而消失 */
+@keyframes skip-exit {
+  0% {
+    transform: translate(6.49px, 0) scale(0.9);
+    opacity: 1;
+  }
+  42% {
+    transform: translate(16px, 0) scale(0.1);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(16px, 0) scale(0.1);
+    opacity: 0;
+  }
+}
+
+/* 补位后的小三角：动画后半段带弹性显现 */
+@keyframes skip-appear {
+  0% {
+    transform: translate(6.49px, 0) scale(0.62);
+    opacity: 0;
+  }
+  76% {
+    transform: translate(6.49px, 0) scale(0.62);
+    opacity: 0;
+  }
+  92% {
+    transform: translate(6.49px, 0) scale(0.97);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(6.49px, 0) scale(0.9);
+    opacity: 1;
+  }
+}
+
+/* 新的大三角从左侧弹性进入 */
+@keyframes skip-enter {
+  0% {
+    transform: translate(-6px, 0) scale(0.42);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-6px, 0) scale(0.42);
+    opacity: 0;
+  }
+  84% {
+    transform: translate(0.5px, 0) scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------
+   触屏设备：抹平 AMLL 自带的 hover 残留
+   core/style.css 里有两条 hover 规则：
+     1) 歌词行 :hover { background-color: var(--amll-lp-hover-bg-color, #fff1) }
+     2) .amll-lyric-player:hover .lyricLine { filter: unset !important }
+   触屏浏览器会把 :hover 一直粘在最后点过的元素上，于是点完歌词那行会留下
+   一条高亮底色，整个歌词区也会一直保持在「悬浮即清晰」状态。
+   这里在无悬浮能力的设备上把底色变量置空（用 AMLL 自己的变量，最干净）。
+------------------------------------------------------------------ */
+@media (hover: none) {
+  .amll-lyric-player {
+    --amll-lp-hover-bg-color: transparent;
+  }
+}
+
+/* 由应用自己的触屏判定驱动（比媒体查询更可靠，与全项目的 isTouch 一致） */
+.is-touch .amll-lyric-player {
+  --amll-lp-hover-bg-color: transparent;
+}
+
+/* ------------------------------------------------------------------
+   触屏点歌词的两个善后
+   1) 按压底色：由 JS 在 pointerdown 时挂上 .lyric-press，松手即摘掉。
+      AMLL 的 hover 底色是普通声明，!important 一定压得住。
+   2) 模糊：AMLL 有
+        .amll-lyric-player:hover .lyricLine,
+        .amll-lyric-player:hover .lyricLineWrapper { filter: unset !important }
+      触屏点完歌词后 :hover 会一直粘着，于是其它行的模糊全没了。
+      行内 blur 值被 JS 镜像到 --aurora-line-filter，这里的选择器比 AMLL
+      的更具体（多出 .is-touch 与属性选择器）且同为 !important，因此能压回去。
+------------------------------------------------------------------ */
+.lyric-press {
+  background-color: rgb(255 255 255 / 0.08) !important;
+  border-radius: 10px;
+}
+
+/* ------------------------------------------------------------------
+   沉浸歌词页入场：整页从屏幕下方滑入。
+   用关键帧而不是过渡：挂载即播放，不依赖 JS 时序；此时 dragY 为 0，
+   不会和拖拽 / 退场的 transform 打架。内容是完整渲染好后整体位移的，
+   所以过程中画面完整，不会出现空白或半渲染的中间态。
+------------------------------------------------------------------ */
+@keyframes sheet-enter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.sheet-enter {
+  animation: sheet-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 提示框入场 */
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.955);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.is-touch .amll-lyric-player:hover [class*="lyricLine"],
+.is-touch .amll-lyric-player:hover [class*="lyricLineWrapper"] {
+  filter: var(--aurora-line-filter, unset) !important;
+}
+
+/* ------------------------------------------------------------------
+   液态玻璃（Liquid Glass）材质
+   只被「触屏 + 竖屏」的底部停靠栏与它的小药丸滑条使用。
+   纯 CSS：没有 WebGL / canvas，iOS Safari 也能跑。
+
+   做法：一层半透明本体 + 1px 渐变描边（上亮下暗）+ backdrop-filter 折射，
+   再叠内阴影（顶部镜面高光 / 底部内暗）与柔和外阴影，最后用一个斜向光泽
+   伪元素模拟玻璃表面的高光带。
+
+   纹理之外的关键是「描边」的写法：用两层背景 + background-clip 把一层
+   渐变裁到 border 上 —— 比 mask-composite 更稳，不需要 -webkit-mask-composite
+   那套各家实现不一致的前缀写法。
+------------------------------------------------------------------ */
+
+/* 内外同心圆的内缩量。
+   停靠栏与滑条都用 rounded-full，所以**圆角半径恒等于半高**。
+   屏幕四角半径 R 与药丸圆角半径 r 满足  R - r = --dock-inset  时，
+   屏幕圆角与药丸圆角才是同心圆（圆心重合）。
+   也就是说：这一个变量同时决定了「药丸离屏幕边缘多远」和
+   「屏幕圆角该比药丸圆角大多少」——所以不能用一堆散落的魔法数字，
+   改这一个值，内外关系自动保持同心。 */
+:root {
+  --dock-inset: 10px;
+  /*
+   * 玻璃本体的两个 alpha 由设置项「玻璃透明度」驱动
+   * （见 App.tsx 里那段 effect，映射公式在 lib/glassTone.ts）。
+   * 那个数字就是**底栏大胶囊的透明度数值** a = (100-t)/100：两层色标都乘 a，
+   * 上沿另乘 0.71 只是明暗配比。80% → 0.142 / 0.20，94% → 0.043 / 0.06。
+   * 玻璃感来自折射、描边与层次，而不是把本体「涂白」。
+   */
+  --glass-body-top: 0.2;
+  --glass-body-bottom: 0.28;
+  /*
+   * 「玻璃透明度」滑块的另外几个变量。
+   *
+   * :root 里是**基准值**（模糊 18px / 饱和 180% / 涂装不淡出）：给歌曲栏、
+   * 合一态那几块玻璃用的固定材质，观感与改动前一致。
+   *
+   * 只有挂了 .liquid-glass--tone 的玻璃（触屏竖屏那颗药丸 + 设置页预览条）
+   * 会读 App.tsx 写进行内的动态值（数字 = 大胶囊的透明度）：
+   *   80% → blur(18px) saturate(180%) + a 0.20 + 完整涂装（今天的观感）
+   *   94% → blur(0px)  saturate(100%) + a 0.06 + 涂装只剩 0.30
+   * 以前只有本体底色在变、描边/高光/磨砂一概不动，所以"数字变了看着没变"。
+   */
+  --glass-blur: 18px;
+  --glass-saturate: 180%;
+  /*
+   * 涂装（描边 / 顶部高光 / 内阴影）的缩放系数：1 = 今天的强度，0 = 完全淡出。
+   * 与「大胶囊的透明度数值」同一条曲线（80% → 1，94% → 0.30）：
+   * 以前只有本体底色在变、描边与高光照旧，所以数字变大后看着还是一块玻璃。
+   */
+  --glass-edge-alpha: 1;
+  /* .liquid-glass-sheen 那道表面光泽，同一条曲线 */
+  --glass-veil-alpha: 1;
+  /* 外阴影（"浮起来"的空间感），与涂装同一个系数 */
+  --glass-shadow-alpha: 1;
+}
+
+/*
+ * 玻璃的「涂装」：本体色标 / 1px 描边 / 外阴影与内高光。
+ *
+ * 必须写在 :root **和** .liquid-glass--tone 两处（两条同内容的规则），
+ * 原因是 CSS 自定义属性的替换时机：
+ *   `--glass-stroke` 里嵌着 `var(--glass-edge-alpha)`，而 `--glass-stroke`
+ *   是在 :root 上解析的 —— 于是它被解析成 :root 的 --glass-edge-alpha（= 1）
+ *   再继承下去，子元素**就地覆盖 --glass-edge-alpha 不会再影响它**。
+ * 所以挂 .liquid-glass--tone 的元素必须自己再声明一遍这三条，
+ * 那一次替换才会用上它本地的系数（80% → 1，94% → 0.30）。
+ * 不这么做的话，"数字变大 → 描边 / 高光跟着淡"就完全失效（实测确认过）。
+ */
+:root,
+.liquid-glass--tone {
+  --glass-body: linear-gradient(
+    to bottom,
+    hsl(240 12% 20% / var(--glass-body-top)),
+    hsl(240 12% 10% / var(--glass-body-bottom))
+  );
+  /*
+   * 1px 描边：上亮下暗，玻璃边缘的折射感（已弱化两档，顶上不再抢眼）。
+   * 每个 alpha 都乘 --glass-edge-alpha：透明度拉高时边缘一起淡出，
+   * 否则玻璃会以「一圈亮边」的形式显形，看着像贴纸而不是快消失的玻璃。
+   */
+  --glass-stroke: linear-gradient(
+    to bottom,
+    rgb(255 255 255 / calc(0.13 * var(--glass-edge-alpha))),
+    rgb(255 255 255 / calc(0.04 * var(--glass-edge-alpha))) 45%,
+    rgb(255 255 255 / calc(0.015 * var(--glass-edge-alpha))) 60%,
+    rgb(255 255 255 / calc(0.07 * var(--glass-edge-alpha)))
+  );
+  /* 外阴影与内高光：同样随透明度一起淡出（94% 时只剩 0.30 倍） */
+  --glass-shadow:
+    0 18px 36px -18px rgb(0 0 0 / calc(0.55 * var(--glass-shadow-alpha))),
+    0 4px 14px -8px rgb(0 0 0 / calc(0.35 * var(--glass-shadow-alpha))),
+    inset 0 1px 0 rgb(255 255 255 / calc(0.055 * var(--glass-edge-alpha))),
+    inset 0 14px 22px -18px rgb(255 255 255 / calc(0.06 * var(--glass-edge-alpha))),
+    inset 0 -14px 24px -16px rgb(0 0 0 / calc(0.5 * var(--glass-shadow-alpha)));
+}
+
+.liquid-glass {
+  position: relative;
+  /* isolate：把伪元素光泽关在自身层叠上下文里，不会溢出去盖到别的元素 */
+  isolation: isolate;
+  border: 1px solid transparent;
+  background-image: var(--glass-body), var(--glass-stroke);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  /* Safari 必须带 -webkit- 前缀，否则完全没有玻璃效果 */
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-shadow);
+}
+
+/* 拿不到 backdrop-filter 时（很老的浏览器）把本体调实，避免糊成一团 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-glass {
+    --glass-body: linear-gradient(
+      to bottom,
+      hsl(240 12% 17% / 0.97),
+      hsl(240 12% 9% / 0.99)
+    );
+  }
+}
+
+/*
+ * 「会随透明度滑块一起变透明」的那几块玻璃：触屏竖屏那颗药丸 + 设置页预览条。
+ *
+ * 为什么需要它：--glass-blur / --glass-saturate / --glass-body-* / --glass-edge-alpha
+ * 都写在 :root 上，直接改就会连带把歌曲栏、合一态那几块玻璃一起改
+ * （它们本来就该保持固定材质）。所以动态值在这里**就地覆盖**，
+ * 只作用于挂了这个修饰类的元素。
+ *
+ * 取值由 App.tsx 从设置算出（公式在 lib/glassTone.ts），那个数字就是
+ * 底栏大胶囊的透明度数值 a = (100-t)/100：
+ *   模糊 18px ↔ 0px（94% 时真的为 0，背后内容原样透出）
+ *   饱和 180% ↔ 100%
+ *   涂装（描边/高光/阴影/光泽）系数 1 ↔ 0.30（与 a 同一条曲线）
+ */
+.liquid-glass--tone {
+  --glass-edge-alpha: var(--glass-edge-fade, 1);
+  --glass-veil-alpha: var(--glass-edge-fade, 1);
+  --glass-shadow-alpha: var(--glass-shadow-fade, 1);
+  /* 注意：--glass-body / --glass-stroke / --glass-shadow 的声明在上面那条
+     `:root, .liquid-glass--tone` 规则里（两处同内容，理由见那里的注释） */
+  /* Safari 必须带前缀 */
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background-image: var(--glass-body), var(--glass-stroke);
+  box-shadow: var(--glass-shadow);
+}
+
+/* 设置页预览条：拖动时不要带出页面滚动（真实底栏靠胶囊上的 touch-none） */
+.glass-preview-surface {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 停靠栏里的选项：按下时轻微收缩，配合药丸的液态手感。
+   曲线与前两项一致（先过一点再回来），但幅度更小 */
+.dock-item {
+  transition:
+    transform 220ms cubic-bezier(.34,1.56,.64,1),
+    color 200ms ease;
+}
+.dock-item:active {
+  transform: scale(0.94);
+}
+
+/* 合一态那一行（TouchMiniBar）的按下反馈。
+   幅度来自设置项「按压形变」：组件把系数写进 --mini-press 与 --mini-press-soft，
+   这里只管「按下时按这个系数缩一下」。
+   用 CSS 的 :active（而不是 React 状态）是刻意的：按压时长完全由指针决定，
+   中途 re-render 也不会把按下的形变提前收回。
+   系数为 0 时下面两条各自算成 scale(1)，即完全不动。 */
+.mini-press {
+  transition: transform 150ms ease-out;
+}
+.mini-press:active {
+  transform: scale(var(--mini-press, 0.9));
+}
+.mini-press-soft:active {
+  transform: scale(var(--mini-press-soft, 0.95));
+}
+
+/* 斜向光泽：玻璃表面那道高光带（已弱化，只留一点方向感）。
+   pointer-events: none，不挡点击与拖拽。
+   每个色标的 alpha 都乘 --glass-veil-alpha：透明度拉高时这道光泽一起淡出
+   （94% 时只剩 0.30 倍），否则它会在"几乎不可见"的玻璃上留下一条白带。
+   必须乘进色标里、而不是改 ::after 的 opacity —— 直接用 opacity 的话
+   乘的是 0.035 这种极小的基数，视觉上几乎看不出变化（实测确认过）。 */
+.liquid-glass-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    118deg,
+    rgb(255 255 255 / calc(0.035 * var(--glass-veil-alpha, 1))) 0%,
+    rgb(255 255 255 / calc(0.014 * var(--glass-veil-alpha, 1))) 18%,
+    rgb(255 255 255 / 0) 42%,
+    rgb(255 255 255 / 0) 58%,
+    rgb(255 255 255 / calc(0.01 * var(--glass-veil-alpha, 1))) 82%,
+    rgb(255 255 255 / 0) 100%
+  );
+}
+
+/* ------------------------------------------------------------------
+   玻璃色调自适应：玻璃背后是大面积浅色时，文字 / 图标自动转深色。
+
+   判定在 src/lib/glassTone.ts 里做（命中测试 + 封面平均亮度），
+   这里只负责「转成什么颜色」与「怎么过渡」。
+
+   颜色不散写在规则里，而是三个变量：默认（背后是深色）沿用主题前景色，
+   `[data-glass-tone="dark"]` 时换成深墨色。这样以后调色只改这一处。
+   过渡统一 240ms：切的是 color，图标是 lucide/SVG 的 currentColor，
+   跟着父级颜色的插值走，所以看起来是「渐变」而不是硬切。
+------------------------------------------------------------------ */
+:root {
+  /* 背后是深色：沿用主题的前景 / 次要 / 主色 */
+  --glass-ink: 0 0% 98%;
+  --glass-ink-muted: 240 5% 64.9%;
+  --glass-ink-primary: 263 85% 66%;
+}
+
+[data-glass-tone] {
+  transition: color 240ms ease;
+}
+
+/* 背后是大面积浅色：换成深色墨，保证在白色上的可读性 */
+[data-glass-tone="dark"] {
+  --glass-ink: 240 10% 12%;
+  --glass-ink-muted: 240 7% 34%;
+  --glass-ink-primary: 263 72% 42%;
+  color: hsl(var(--glass-ink));
+}
+
+/* 玻璃里带显式颜色类的元素（Tailwind 的 text-* 优先级只有一层类，
+   这里多一层属性选择器压过去），并让它们自己也有颜色过渡 */
+[data-glass-tone="dark"] .text-foreground,
+[data-glass-tone="dark"] .text-muted-foreground,
+[data-glass-tone="dark"] .text-primary {
+  transition: color 240ms ease;
+}
+[data-glass-tone="dark"] .text-foreground {
+  color: hsl(var(--glass-ink));
+}
+[data-glass-tone="dark"] .text-muted-foreground {
+  color: hsl(var(--glass-ink-muted));
+}
+[data-glass-tone="dark"] .text-primary {
+  color: hsl(var(--glass-ink-primary));
+}
+
+/* ------------------------------------------------------------------
+   歌曲探索页（src/pages/ExplorePage.tsx）
+   - 切换选中歌曲时，顶端信息条做一个轻量的上移淡入；
+   - 3D 的块必须保留 preserve-3d，否则 translateZ 会被压平（高度就没了）；
+   - 侧面高度 / 顶面 translateZ 都做过渡，切换选中时高度连续重分布。
+   - 相机固定且**没有 perspective**：这里不写、也不允许写透视，平行投影才成立。
+------------------------------------------------------------------ */
+
+@keyframes explore-info-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.explore-info-swap {
+  animation: explore-info-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.explore-stage {
+  /* 深色底 + 一点冷紫 / 青色氛围光，让封面与立体块的边缘更清楚 */
+  background:
+    radial-gradient(120% 90% at 50% 0%, hsl(263 70% 26% / 0.55), transparent 62%),
+    radial-gradient(90% 90% at 82% 100%, hsl(190 70% 24% / 0.38), transparent 68%),
+    hsl(var(--card));
+}
+
+.explore-plane {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+}
+
+.explore-block {
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  /* 按钮默认样式清掉：不要出现边框 / 背景把 3D 渲染上下文压平 */
+  border: 0;
+  background: transparent;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.explore-block-top {
+  backface-visibility: hidden;
+}
+
+.explore-block-side {
+  backface-visibility: hidden;
+  border-radius: 1px;
+}
+
