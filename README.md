@@ -2,6 +2,8 @@
 
 [English](./README.en.md) | 中文
 
+> **当前版本：`1.0.0 beta-1`（Beta 测试版）** —— 功能与数据格式仍可能变动，请自行评估后再日常使用。
+
 **Aurora Music 是一个多端网易云音乐播放器**：一套 React 前端 + 一个本机 Node 代理，既能当网页用（手机连同一 Wi-Fi 直接打开），也能打包成 Windows / macOS / Linux 桌面应用（Tauri 2），还预留了 Android / iOS 的构建脚本。
 
 ---
@@ -130,7 +132,7 @@ npm run tauri -- <命令> # 直接调用 Tauri CLI，例如 npm run tauri icon s
 | 可执行文件 | `src-tauri/target/release/aurora-music.exe` |
 | 安装包 | `src-tauri/target/release/bundle/` 下，Windows 的 NSIS 安装包在 `bundle/nsis/` |
 
-例如本机已有的产物：`src-tauri\target\release\bundle\nsis\Aurora Music_0.1.0_x64-setup.exe`（名字里的 `Aurora Music` 与 `0.1.0` 分别来自 `tauri.conf.json` 的 `productName` 与 `version`）。
+例如本机已有的产物：`src-tauri\target\release\bundle\nsis\Aurora Music_1.0.0-beta.1_x64-setup.exe`（名字里的 `Aurora Music` 与 `1.0.0-beta.1` 分别来自 `tauri.conf.json` 的 `productName` 与 `version`；版本号必须是合法 SemVer，所以「1.0.0 beta-1」写作 `1.0.0-beta.1`）。
 
 > `desktop:build` 内部会调用 `pnpm build`（`tauri.conf.json` 的 `beforeBuildCommand`），所以机器上要有可用的 `pnpm`；只跑网页端则 `npm run build` 就够。
 

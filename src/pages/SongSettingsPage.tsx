@@ -65,10 +65,19 @@ function overrideToExportRecord(o: SongOverride) {
   };
 }
 
-/** 本地日期（不是 UTC）：导出文件名用，跨时区时不会差一天 */
-function localDateStamp(d = new Date()): string {
+/**
+ * 本地日期时间（不是 UTC）：导出文件名用。
+ *
+ * - 用**本地**时间，跨时区时不会差一天；
+ * - 精确到**秒**（`YYYY-MM-DD_HH-mm-ss`）：同一天里连着导出几次不会互相覆盖，
+ *   按文件名排序也等于按导出先后排序；
+ * - 时间部分用 `-` 而不是 `:` —— Windows 文件名不允许冒号。
+ */
+function localDateTimeStamp(d = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const time = `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+  return `${date}_${time}`;
 }
 
 /** 从 audioName 里取扩展名（ZIP 内 `audio/<songId>.<ext>` 用）；取不到用 bin */
@@ -482,7 +491,7 @@ export default function SongSettingsPage() {
     const url = URL.createObjectURL(zip);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `aurora-song-settings-${localDateStamp()}.zip`;
+    a.download = `aurora-song-settings-${localDateTimeStamp()}.zip`;
     a.style.display = "none";
     document.body.appendChild(a);
     a.click();

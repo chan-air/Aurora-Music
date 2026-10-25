@@ -2,6 +2,8 @@
 
 English | [中文](./README.md)
 
+> **Current version: `1.0.0 beta-1` (beta)** — features and on-disk data formats may still change; try it before relying on it day to day.
+
 **Aurora Music is a multi-platform NetEase Cloud Music player**: one React front end plus a local Node proxy. Run it as a web app (open it on your phone over the same Wi-Fi), or package it as a native Windows / macOS / Linux desktop app with Tauri 2. Build scripts for Android and iOS are wired up as well.
 
 ---
@@ -130,7 +132,7 @@ Where the artifacts land (`bundle.targets = "all"` in `src-tauri/tauri.conf.json
 | Executable | `src-tauri/target/release/aurora-music.exe` |
 | Installers | Under `src-tauri/target/release/bundle/`; the Windows NSIS installer is in `bundle/nsis/` |
 
-An existing example from this machine: `src-tauri\target\release\bundle\nsis\Aurora Music_0.1.0_x64-setup.exe` (the `Aurora Music` and `0.1.0` in the name come from `productName` and `version` in `tauri.conf.json`).
+An existing example from this machine: `src-tauri\target\release\bundle\nsis\Aurora Music_1.0.0-beta.1_x64-setup.exe` (the `Aurora Music` and `1.0.0-beta.1` in the name come from `productName` and `version` in `tauri.conf.json`; the version has to be valid SemVer, so "1.0.0 beta-1" is written as `1.0.0-beta.1`).
 
 > `desktop:build` internally calls `pnpm build` (`beforeBuildCommand` in `tauri.conf.json`), so a working `pnpm` must be available. For the web app alone, `npm run build` is enough.
 
