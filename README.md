@@ -296,7 +296,10 @@ AMLL 基于 PixiJS（WebGL）渲染，确认设备支持 WebGL；`@applemusic-li
 
 ## 10. 许可与致谢
 
-- **本项目的许可：未声明。** 仓库里没有 `LICENSE` / `COPYING` 文件，也没有作者信息，因此这里不写任何许可条款 —— 需要正式分发前请先自行确定。
+- **本项目的许可：AGPL-3.0**（见仓库根目录的 [`LICENSE`](./LICENSE)）。
+  - **为什么是 AGPL-3.0 而不是 MIT**：本项目使用 `@applemusic-like-lyrics/core`、`/react`、`/lyric`，三个包均为 **AGPL-3.0-only**。它们会被打进前端 bundle 与桌面端二进制，构成结合作品，因此整个作品必须按 AGPL-3.0 分发。
+  - 按 AGPL-3.0 第 13 条，**通过网络使用本程序的用户同样有权获取完整对应源码**：<https://github.com/chan-air/Aurora-Music>。
+  - 再分发修改版时，请保留 `LICENSE` 与各第三方组件的版权声明。
 - 第三方组件致谢：
   - [NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi)（`server/` 的代理内核，自带 `server/README.md`）
   - [Apple Music Like Lyrics (AMLL)](https://github.com/amll-dev/applemusic-like-lyrics)（歌词渲染与解析；使用前请自行确认其许可条款）

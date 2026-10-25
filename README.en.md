@@ -295,7 +295,10 @@ AMLL renders through PixiJS (WebGL), so confirm the device supports WebGL. `@app
 
 ## 10. License and credits
 
-- **License for this project: not declared.** There is no `LICENSE` or `COPYING` file in the repository, and no author information, so no license terms are stated here. Determine them yourself before distributing anything.
+- **License for this project: AGPL-3.0** (see [`LICENSE`](./LICENSE) in the repository root).
+  - **Why AGPL-3.0 rather than MIT**: this project uses `@applemusic-like-lyrics/core`, `/react`, and `/lyric`, all of which are **AGPL-3.0-only**. They are bundled into the front-end bundle and the desktop binaries, forming a combined work, so the whole work must be distributed under AGPL-3.0.
+  - Under AGPL-3.0 §13, **users who interact with this program over a network are also entitled to the complete corresponding source**: <https://github.com/chan-air/Aurora-Music>.
+  - When redistributing a modified version, keep `LICENSE` and the copyright notices of the third-party components.
 - Third-party credits:
   - [NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi) (the proxy core under `server/`, which ships its own `server/README.md`)
   - [Apple Music Like Lyrics (AMLL)](https://github.com/amll-dev/applemusic-like-lyrics) (lyric rendering and parsing; check its license terms yourself before use)
