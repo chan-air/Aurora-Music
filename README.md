@@ -2,7 +2,7 @@
 
 [English](./README.en.md) | 中文
 
-> **当前版本：`1.0.0 beta-1`（Beta 测试版）** —— 功能与数据格式仍可能变动，请自行评估后再日常使用。
+> **当前为 Beta 测试版** —— 功能与数据格式仍可能变动，请自行评估后再日常使用。
 
 **Aurora Music 是一个多端网易云音乐播放器**：一套 React 前端 + 一个本机 Node 代理，既能当网页用（手机连同一 Wi-Fi 直接打开），也能打包成 Windows / macOS / Linux 桌面应用（Tauri 2），还预留了 Android / iOS 的构建脚本。
 
