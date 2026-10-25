@@ -2,7 +2,7 @@
 
 English | [中文](./README.md)
 
-> **Current version: `1.0.0 beta-1` (beta)** — features and on-disk data formats may still change; try it before relying on it day to day.
+> **Current version is a beta version** — features and on-disk data formats may still change; try it before relying on it day to day.
 
 **Aurora Music is a multi-platform NetEase Cloud Music player**: one React front end plus a local Node proxy. Run it as a web app (open it on your phone over the same Wi-Fi), or package it as a native Windows / macOS / Linux desktop app with Tauri 2. Build scripts for Android and iOS are wired up as well.
 
