@@ -319,6 +319,8 @@ AMLL renders through PixiJS (WebGL), so confirm the device supports WebGL. `@app
 - **No warranty**: this project is provided **"AS IS"** under **AGPL-3.0**, without any express or implied warranty, and the author accepts no liability for the consequences of its use.
 - **Takedown**: if a rights holder believes this project infringes their rights, please reach out via the repository Issues or the contact on the profile page. After verification I will **remove the relevant content or stop distributing it immediately**.
 
+> The same notice also lives **inside the app**: it is shown once on first launch (dismissed for good after “I understand”), and can be reopened anytime from **Settings → About / Disclaimer**, which also shows the current version and the source repository.
+
 ---
 
 If something is off, read section 8 first — and remember: **restart the proxy after backend changes, and hard-refresh the page when the UI looks wrong.**

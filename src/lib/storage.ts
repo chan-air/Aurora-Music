@@ -934,3 +934,29 @@ export async function getPlayerState(): Promise<PlayerStateSnapshot | null> {
 export async function savePlayerState(state: PlayerStateSnapshot): Promise<void> {
   await kvSet("player_state", JSON.stringify(state));
 }
+
+/* ---------------- 免责声明同意记录 ---------------- */
+
+/**
+ * 「首次启动的版权与免责声明」是否已经被用户确认过。
+ *
+ * 用 kv 存储（网页端 localStorage / 桌面端 SQLite）落一份，值形如
+ * `{"version":"0.0.1-beta","at":1793000000000}` —— version 只用于排查「哪个版本同意的」，
+ * **不做版本比对**：同意一次就不再打扰（Beta 期间版本号会频繁变，按版本弹会很烦）。
+ * 读不到 / 解析失败都当作「没同意过」，宁可多弹一次，也不要默默跳过声明。
+ */
+export async function getDisclaimerAccepted(): Promise<{ version: string; at: number } | null> {
+  const raw = await kvGet("disclaimer_accepted");
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as { version?: unknown; at?: unknown };
+    if (typeof parsed.at !== "number") return null;
+    return { version: typeof parsed.version === "string" ? parsed.version : "", at: parsed.at };
+  } catch {
+    return null;
+  }
+}
+
+export async function saveDisclaimerAccepted(version: string): Promise<void> {
+  await kvSet("disclaimer_accepted", JSON.stringify({ version, at: Date.now() }));
+}

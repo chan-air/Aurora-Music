@@ -2,6 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
 
+/*
+ * 版本号不在这里注入：`src/lib/version.ts` 直接 import `package.json` 的 `version`。
+ * 试过用 define 注入 __APP_VERSION__，生产构建能替换、**dev 下不会**，会导致设置页
+ * 在开发时显示 "版本 dev"，两个环境不一致（已实测）。
+ */
+
 // Tauri 2 开发服务器固定使用 1420 端口（与 src-tauri/tauri.conf.json 的 devUrl 对应）
 const host = process.env.TAURI_DEV_HOST;
 

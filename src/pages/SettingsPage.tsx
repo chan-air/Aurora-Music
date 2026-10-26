@@ -16,6 +16,7 @@ import {
 } from "@/lib/settings";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/appStore";
+import { AboutCard } from "@/components/common/AboutCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -643,6 +644,9 @@ export default function SettingsPage() {
         改动前请先读卡片里的取舍说明。
       */}
       <LockCompatExperiment />
+
+      {/* 关于 / 免责声明：版本号 + 版权声明 + 源码仓库（AGPL-3.0 §13） */}
+      <AboutCard />
     </div>
   );
 }

@@ -37,6 +37,7 @@ import {
 import { publishSongSettings, startShareSync } from "@/lib/share";
 import { useLyricsFollowFullscreen } from "@/hooks/useLyricsFollowFullscreen";
 import { usePlayerShortcuts } from "@/hooks/usePlayerShortcuts";
+import { DisclaimerGate } from "@/components/common/DisclaimerGate";
 
 /** 清理指向「已不存在的本地音频」的替换标记（例如浏览器不允许持久化存储时） */
 async function pruneMissingLocalAudio(): Promise<void> {
@@ -411,28 +412,35 @@ export default function App() {
   usePlayerShortcuts();
 
   return (
-    <AppLayout>
-      <Routes>
-        {/*
-          首页 = 用户主页：原来的「欢迎页」（HomePage）已删除，
-          根路由直接指向 UserPage；/user 与 /user/:uid 保留可用。
-        */}
-        <Route path="/" element={<UserPage />} />
-        <Route path="/user" element={<UserPage />} />
-        <Route path="/user/:uid" element={<UserPage />} />
-        <Route path="/playlist/:id" element={<PlaylistPage />} />
-        {/* 歌曲探索：歌单页的「探索」入口进来；路径独立，刷新 / 直接打开都能复现同一排列 */}
-        <Route path="/playlist/:id/explore" element={<ExplorePage />} />
-        <Route path="/album/:id" element={<AlbumPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        {/* 「歌曲」卡片页；原来的歌曲设置挪到 /song-settings */}
-        <Route path="/songs" element={<SongsPage />} />
-        <Route path="/song-settings" element={<SongSettingsPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="*" element={<UserPage />} />
-      </Routes>
-    </AppLayout>
+    <>
+      <AppLayout>
+        <Routes>
+          {/*
+            首页 = 用户主页：原来的「欢迎页」（HomePage）已删除，
+            根路由直接指向 UserPage；/user 与 /user/:uid 保留可用。
+          */}
+          <Route path="/" element={<UserPage />} />
+          <Route path="/user" element={<UserPage />} />
+          <Route path="/user/:uid" element={<UserPage />} />
+          <Route path="/playlist/:id" element={<PlaylistPage />} />
+          {/* 歌曲探索：歌单页的「探索」入口进来；路径独立，刷新 / 直接打开都能复现同一排列 */}
+          <Route path="/playlist/:id/explore" element={<ExplorePage />} />
+          <Route path="/album/:id" element={<AlbumPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          {/* 「歌曲」卡片页；原来的歌曲设置挪到 /song-settings */}
+          <Route path="/songs" element={<SongsPage />} />
+          <Route path="/song-settings" element={<SongSettingsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="*" element={<UserPage />} />
+        </Routes>
+      </AppLayout>
+      {/*
+        版权与免责声明：首次启动弹一次（人工点「我已了解」后才记录，
+        记录落在 kv 存储里，见 lib/storage.ts 的 getDisclaimerAccepted / saveDisclaimerAccepted）。
+      */}
+      <DisclaimerGate />
+    </>
   );
 }
